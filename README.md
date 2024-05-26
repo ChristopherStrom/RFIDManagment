@@ -1,13 +1,13 @@
 # RFID Management
 
-RFID Management software to track RFID tags. Free for non-commercial use.
+RFID Management, ChipLogic software to track RFID tags. Free for non-commercial use.
 
 ## Overview
-Our RFID Management software provides an efficient solution to track and manage RFID tags. This tool is ideal for inventory management, asset tracking, and more.
+Our ChipLogic software provides an efficient solution to track and manage RFID tags. This tool is ideal for inventory management, asset tracking, and more.
 
 ## License
 
-This software is licensed under the GNU Affero General Public License (AGPL) for open-source, non-commercial use. For commercial use, a license must be purchased from ChipLogicSolutions.
+This software is licensed under the GNU Affero General Public License (AGPL) for open-source, non-commercial use. For commercial use, a license must be purchased from ChipLogicSolutions or CyberLab Services LLC.
 
 ### Non-Commercial Use
 You are free to use, modify, and distribute this software under the terms of the AGPL for non-commercial purposes. This includes the requirement to share your modifications under the same license.
