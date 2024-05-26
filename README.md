@@ -36,7 +36,7 @@ We welcome contributions from the community. Please fork the repository and subm
 
 ## Support
 
-For support, please visit our [website](https://www.chiplogicsolutions.com) or contact us at support@chiplogicsolutions.com.
+For support, please visit our [website](https://www.chiplogicsolutions.com) or contact us at support@clsio.com.
 
 ## Authors and Acknowledgments
 
