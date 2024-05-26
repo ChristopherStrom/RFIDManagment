@@ -40,6 +40,32 @@
                     </Setter>
                 </Style>
 
+                <!-- Define a modern style for textboxes -->
+                <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
+                    <Setter Property="Margin" Value="10"/>
+                    <Setter Property="Padding" Value="10"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="Background" Value="#FFE5E5E5"/>
+                    <Setter Property="BorderBrush" Value="#FF1E90FF"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Height" Value="40"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+
+                <!-- Define a modern style for password boxes -->
+                <Style x:Key="ModernPasswordBoxStyle" TargetType="PasswordBox">
+                    <Setter Property="Margin" Value="10"/>
+                    <Setter Property="Padding" Value="10"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="Background" Value="#FFE5E5E5"/>
+                    <Setter Property="BorderBrush" Value="#FF1E90FF"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Height" Value="40"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+
                 <!-- Define a simple button style for title bar buttons -->
                 <Style x:Key="TitleBarButtonStyle" TargetType="Button">
                     <Setter Property="Background" Value="Transparent"/>
@@ -67,7 +93,7 @@
             </Grid>
 
             <!-- Left menu bar -->
-            <Grid Grid.Column="0" Grid.Row="1" Background="#FF003366">
+            <Grid x:Name="LeftMenuBar" Grid.Column="0" Grid.Row="1" Background="#FF003366">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
@@ -76,21 +102,25 @@
                     <!-- Logo spot -->
                     <Image Width="150" Height="112.5" Margin="20" HorizontalAlignment="Left"/>
                     <!-- Menu buttons -->
-                    <Button Content="Assign" Style="{StaticResource LeftBarButtonStyle}" Click="AssignButton_Click"/>
-                    <Button Content="Scan In" Style="{StaticResource LeftBarButtonStyle}" Click="ScanInButton_Click"/>
-                    <Button Content="Scan Out" Style="{StaticResource LeftBarButtonStyle}"/>
-                    <Button Content="Setup" Style="{StaticResource LeftBarButtonStyle}"/>
+                    <Button x:Name="AssignButton" Content="Assign" Style="{StaticResource LeftBarButtonStyle}" Click="AssignButton_Click" Visibility="Collapsed"/>
+                    <Button x:Name="ScanInButton" Content="Scan In" Style="{StaticResource LeftBarButtonStyle}" Click="ScanInButton_Click" Visibility="Collapsed"/>
+                    <Button x:Name="ScanOutButton" Content="Scan Out" Style="{StaticResource LeftBarButtonStyle}" Click="ScanOutButton_Click" Visibility="Collapsed"/>
+                    <Button x:Name="SetupButton" Content="Setup" Style="{StaticResource LeftBarButtonStyle}" Click="SettingsButton_Click" Visibility="Collapsed"/>
+                    <Button x:Name="LogoutButton" Content="Logout" Style="{StaticResource LeftBarButtonStyle}" Click="PerformLogout_Click" Visibility="Collapsed"/>
                 </StackPanel>
                 <!-- Login section -->
-                <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="10">
-                    <Button Content="Login" Style="{StaticResource LeftBarButtonStyle}"/>
-                    <TextBlock Text="Logged in as: User" Foreground="White" Margin="10,5,0,0"/>
+                <StackPanel x:Name="LoginPanel" Grid.Row="1" VerticalAlignment="Bottom" Margin="10">
+                    <TextBox x:Name="UsernameTextBox" Text="Username" Style="{StaticResource ModernTextBoxStyle}" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText"/>
+                    <PasswordBox x:Name="PasswordBox" Password="Password" Style="{StaticResource ModernPasswordBoxStyle}" GotFocus="RemovePasswordPlaceholder" LostFocus="AddPasswordPlaceholder"/>
+                    <Button x:Name="LoginButton" Content="Login" Style="{StaticResource LeftBarButtonStyle}" Click="PerformLogin_Click" Visibility="Visible"/>
+                    <TextBlock x:Name="LoggedInUserText" Text="Logged in as: User" Foreground="White" Margin="10,5,0,0" Visibility="Collapsed"/>
                 </StackPanel>
             </Grid>
 
             <!-- Main application area -->
             <Grid Grid.Column="1" Grid.Row="1" Background="#FFE5E5E5">
-                <Frame x:Name="MainFrame" Content="MainFrame" Background="#FFE5E5E5" NavigationUIVisibility="Hidden"/>
+                <!-- MainFrame -->
+                <Frame x:Name="MainFrame" Content="MainFrame" Background="#FFE5E5E5" NavigationUIVisibility="Hidden" Visibility="Collapsed"/>
             </Grid>
 
             <!-- Status bar -->
@@ -99,10 +129,13 @@
                     <TextBlock Text="Reader IP: 192.168.1.100"/>
                 </StatusBarItem>
                 <StatusBarItem>
-                    <TextBlock Text=" |  Reader MAC: 00:1A:2B:3C:4D:5E"/>
+                    <TextBlock Text="Reader MAC: 00:1A:2B:3C:4D:5E"/>
                 </StatusBarItem>
                 <StatusBarItem>
-                    <TextBlock Text=" |  Last Scan: 2024-05-25 14:30"/>
+                    <TextBlock Text="Last Scan: 2024-05-25 14:30"/>
+                </StatusBarItem>
+                <StatusBarItem HorizontalAlignment="Right" Margin="0,0,20,0">
+                    <TextBlock x:Name="DbStatusTextBlock" Text="Database not connected" Foreground="Red"/>
                 </StatusBarItem>
             </StatusBar>
 
