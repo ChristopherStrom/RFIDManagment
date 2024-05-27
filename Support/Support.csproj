@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommandLineParser" Version="2.9.1" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ChipLogic Station\ChipLogic.csproj" />
+	</ItemGroup>
+
+</Project>

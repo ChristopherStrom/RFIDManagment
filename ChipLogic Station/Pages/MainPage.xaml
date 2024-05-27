@@ -1,0 +1,8 @@
+﻿<Page x:Class="ChipLogic.Pages.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="MainPage">
+    <Grid Background="White">
+        <TextBlock Text="Please login :)" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="24"/>
+    </Grid>
+</Page>

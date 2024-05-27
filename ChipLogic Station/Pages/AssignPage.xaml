@@ -1,0 +1,8 @@
+﻿<Page x:Class="ChipLogic.Pages.AssignPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="AssignPage">
+    <Grid Background="White">
+        <TextBlock Text="Assign Page" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="24"/>
+    </Grid>
+</Page>
