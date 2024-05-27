@@ -71,8 +71,10 @@ namespace ChipLogic
                     SetDatabaseStatus(true);
                 }
             }
-
             #endregion
+
+            // Navigate to WelcomePage on application start
+            MainFrame.Navigate(new WelcomePage());
         }
 
         private void SetDatabaseStatus(bool isConnected)
@@ -176,6 +178,8 @@ namespace ChipLogic
                 LoginButton.Visibility = Visibility.Collapsed;
 
                 LoggedInUserText.Text = $"Logged in as: {UsernameTextBox.Text}";
+
+                MainFrame.Navigate(new WelcomePage());
             }
             else
             {
@@ -198,10 +202,10 @@ namespace ChipLogic
                 PasswordBox.Password = "********";
                 PasswordBox.Tag = "Placeholder";
                 PasswordBox.Foreground = Brushes.Gray;
+
+                MainFrame.Navigate(new WelcomePage());
             }
         }
-
-      
 
         private void RemovePlaceholderText(object sender, RoutedEventArgs e)
         {
