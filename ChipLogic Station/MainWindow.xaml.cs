@@ -18,7 +18,7 @@ namespace ChipLogic
         private bool isLoggedIn = false;
         private bool debug;
         private bool isMaximized = false;
-        private DatabaseConfig config;  // Declare config as a class-level field
+        private DatabaseConfig config;
 
         public MainWindow()
         {
@@ -27,8 +27,8 @@ namespace ChipLogic
             #region Database Initialization
 
             // Load configuration
-            config = ConfigManager.LoadOrCreateConfig();  // Initialize the config variable
-            debug = config.Debug;  // Set the debug flag based on the config file
+            config = ConfigManager.LoadOrCreateConfig();
+            debug = config.Debug;
 
             if (!ConfigManager.ValidateConfig(config))
             {
@@ -41,7 +41,6 @@ namespace ChipLogic
 
             if (config.IsDatabaseCreated)
             {
-                // Try to connect to the existing database
                 isDatabaseConnected = DatabaseInitializer.CheckDatabaseConnection(config);
 
                 if (!isDatabaseConnected)
@@ -51,13 +50,13 @@ namespace ChipLogic
                 }
                 else
                 {
+                    DatabaseInitializer.CheckAndUpdateDatabase(config, GlobalConstants.CurrentVersion);
                     Logger.Log("Database connection successful.", isError: false, debug: debug);
                     SetDatabaseStatus(true);
                 }
             }
             else
             {
-                // Try to create and seed the database
                 isDatabaseConnected = DatabaseInitializer.CreateDatabaseAndSeed(config);
 
                 if (!isDatabaseConnected)
@@ -160,15 +159,12 @@ namespace ChipLogic
             isLoggedIn = false;
             Logger.Log("Logout successful.", isError: false, debug: debug);
 
-            // Create a default UserPermissions object with all permissions set to false
             var defaultPermissions = (IsAdmin: false, CanScanIn: false, CanScanOut: false, CanAssign: false, CanViewReports: false);
-
-            // Update the login state with default permissions
             UpdateLoginState(defaultPermissions);
 
-            // Navigate to WelcomePage after logout
             MainFrame.Navigate(new WelcomePage());
         }
+
         private void UpdateLoginState((bool IsAdmin, bool CanScanIn, bool CanScanOut, bool CanAssign, bool CanViewReports) permissions)
         {
             Logger.Log("Updating login state.", isError: false, debug: debug);
@@ -209,7 +205,6 @@ namespace ChipLogic
                 PasswordBox.Foreground = Brushes.Gray;
             }
         }
-
 
         private void RemovePlaceholderText(object sender, RoutedEventArgs e)
         {

@@ -106,7 +106,8 @@ namespace ChipLogic.Database
                     CREATE TABLE Users (
                         UserID UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
                         Username NVARCHAR(50) NOT NULL UNIQUE,
-                        PasswordHash NVARCHAR(128) NOT NULL
+                        PasswordHash NVARCHAR(128) NOT NULL,
+                        isActive BIT NOT NULL DEFAULT 1
                     );
                 END
                 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Keys')
@@ -187,7 +188,7 @@ namespace ChipLogic.Database
             string hashedPassword = HashPassword(password, salt);
 
             Logger.Log("Inserting default user with hashed password...", isError: false, debug: config.Debug);
-            string insertUserQuery = "INSERT INTO Users (UserID, Username, PasswordHash) VALUES (NEWID(), 'ChipLogic', @PasswordHash)";
+            string insertUserQuery = "INSERT INTO Users (UserID, Username, PasswordHash, isActive) VALUES (NEWID(), 'ChipLogic', @PasswordHash, 1)";
             using (SqlCommand command = new SqlCommand(insertUserQuery, connection))
             {
                 try
@@ -262,7 +263,7 @@ namespace ChipLogic.Database
                         if (string.Compare(versionInDb, currentVersion) < 0)
                         {
                             Logger.Log($"Updating database from version {versionInDb} to {currentVersion}.", isError: false, debug: config.Debug);
-                            UpdateDatabaseSchema(connection);
+                            UpdateDatabaseSchema(connection, currentVersion);
                             UpdateVersionTable(connection, currentVersion);
                         }
                         else
@@ -297,20 +298,20 @@ namespace ChipLogic.Database
             }
         }
 
-        private static void UpdateDatabaseSchema(SqlConnection connection)
+        private static void UpdateDatabaseSchema(SqlConnection connection, string currentVersion)
         {
-            Logger.Log("Updating database schema to version 1.0.1...", isError: false, debug: true);
+            Logger.Log($"Updating database schema to version {currentVersion}...", isError: false, debug: true);
             string updateSchemaQuery = @"
-                -- Add your database schema updates here, for example:
-                -- ALTER TABLE Users ADD COLUMN NewColumn NVARCHAR(50);
-                -- No schema updates needed for version 1.0.1
-            ";
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'isActive' AND Object_ID = Object_ID(N'Users'))
+                BEGIN
+                    ALTER TABLE Users ADD isActive BIT NOT NULL DEFAULT 1;
+                END";
             using (SqlCommand command = new SqlCommand(updateSchemaQuery, connection))
             {
                 try
                 {
                     command.ExecuteNonQuery();
-                    Logger.Log("Database schema updated successfully to version 1.0.1.", isError: false, debug: true);
+                    Logger.Log($"Database schema updated successfully to version {currentVersion}.", isError: false, debug: true);
                 }
                 catch (SqlException sqlEx)
                 {
@@ -426,7 +427,7 @@ namespace ChipLogic.Database
                     string currentVersionInDb = command.ExecuteScalar()?.ToString();
                     if (currentVersionInDb != GlobalConstants.CurrentVersion)
                     {
-                        UpdateDatabaseSchema(connection);
+                        UpdateDatabaseSchema(connection, GlobalConstants.CurrentVersion);
                         UpdateVersionTable(connection, GlobalConstants.CurrentVersion);
                         return true;
                     }

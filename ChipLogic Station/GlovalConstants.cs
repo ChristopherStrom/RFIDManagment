@@ -8,6 +8,6 @@ namespace ChipLogic
 {
     public static class GlobalConstants
     {
-        public const string CurrentVersion = "1.0.1";
+        public const string CurrentVersion = "1.0.2";
     }
 }

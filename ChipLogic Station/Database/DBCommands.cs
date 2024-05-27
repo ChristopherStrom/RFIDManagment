@@ -27,7 +27,7 @@ namespace ChipLogic.Database
             {
                 connection.Open();
 
-                string query = "INSERT INTO Users (Username, PasswordHash) VALUES (@Username, @PasswordHash);" +
+                string query = "INSERT INTO Users (Username, PasswordHash, isActive) VALUES (@Username, @PasswordHash, 1);" +
                                "INSERT INTO UserPermissions (UserID, IsAdmin, CanScanIn, CanScanOut, CanAssign, CanViewReports) " +
                                "VALUES ((SELECT UserID FROM Users WHERE Username = @Username), 0, 0, 0, 0, 0);";
 
@@ -49,26 +49,15 @@ namespace ChipLogic.Database
             {
                 connection.Open();
 
-                // Delete UserPermissions first
-                string deletePermissionsQuery = "DELETE FROM UserPermissions WHERE UserID = (SELECT UserID FROM Users WHERE Username = @Username);";
+                string query = "DELETE FROM UserPermissions WHERE UserID = (SELECT UserID FROM Users WHERE Username = @Username);" +
+                               "DELETE FROM Users WHERE Username = @Username;";
 
-                using (SqlCommand deletePermissionsCommand = new SqlCommand(deletePermissionsQuery, connection))
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    deletePermissionsCommand.Parameters.AddWithValue("@Username", username);
-                    deletePermissionsCommand.ExecuteNonQuery();
-                }
-
-                // Then delete the user
-                string deleteUserQuery = "DELETE FROM Users WHERE Username = @Username;";
-
-                using (SqlCommand deleteUserCommand = new SqlCommand(deleteUserQuery, connection))
-                {
-                    deleteUserCommand.Parameters.AddWithValue("@Username", username);
-                    deleteUserCommand.ExecuteNonQuery();
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.ExecuteNonQuery();
                 }
             }
-
-            Logger.Log($"User {username} deleted successfully.", isError: false);
         }
 
         public static void ChangePassword(string username, string newPassword, string connectionString)
@@ -100,7 +89,7 @@ namespace ChipLogic.Database
                 {
                     connection.Open();
 
-                    string query = "SELECT U.PasswordHash FROM Users U WHERE U.Username = @Username";
+                    string query = "SELECT U.PasswordHash, U.isActive FROM Users U WHERE U.Username = @Username";
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@Username", username);
@@ -109,6 +98,13 @@ namespace ChipLogic.Database
                         {
                             if (reader.Read())
                             {
+                                bool isActive = Convert.ToBoolean(reader["isActive"]);
+                                if (!isActive)
+                                {
+                                    Logger.Log($"User {username} is not active.", isError: true);
+                                    return false;
+                                }
+
                                 string storedHash = reader["PasswordHash"].ToString();
                                 string storedSalt = DatabaseInitializer.GetStoredSalt(connectionString);
                                 string hash = DatabaseInitializer.HashPassword(password, storedSalt);
