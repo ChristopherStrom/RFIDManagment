@@ -1,28 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows.Controls;
+using ChipLogic.Pages.Settings.SettingsPages;
 
-namespace ChipLogic.Pages
+namespace ChipLogic.Pages.Settings
 {
-    /// <summary>
-    /// Interaction logic for ScanInPage.xaml
-    /// </summary>
     public partial class SettingsPage : Page
     {
         public SettingsPage()
         {
             InitializeComponent();
+        }
+
+        private void ManageUsersButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ManageUsersPage());
+        }
+
+        private void ManageReadersButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ManageReadersPage());
+        }
+
+        private void ManageItemsButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ManageItemsPage());
+        }
+
+        private void ManageCustomersButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ManageCustomersPage());
         }
     }
 }

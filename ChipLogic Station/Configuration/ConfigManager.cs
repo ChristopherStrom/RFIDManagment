@@ -1,104 +1,74 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Xml.Linq;
+using System.Xml.Serialization;
+using ChipLogic.Utils;
 
 namespace ChipLogic.Configuration
 {
-    public class ConfigManager
+    public static class ConfigManager
     {
-        private static readonly Dictionary<string, string> DefaultConfigItems = new Dictionary<string, string>
-        {
-            { "ConnectionString", "Server=.\\sqlexpress;Database=ChipLogic;User Id=ChipLogic;Password=ChipLogic;TrustServerCertificate=True;" },
-            { "IsDatabaseCreated", "false" },
-            { "Debug", "false" }
-        };
-
-        #region Config File Path
-
-        private static string GetConfigFilePath()
-        {
-            string installDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            return Path.Combine(installDirectory, "config.xml");
-        }
-
-        #endregion
-
-        #region Load or Create Config
+        private static readonly string configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.xml");
 
         public static DatabaseConfig LoadOrCreateConfig()
         {
-            string configFilePath = GetConfigFilePath();
-
-            if (!File.Exists(configFilePath))
+            if (File.Exists(configFilePath))
             {
-                CreateDefaultConfig(configFilePath);
+                return LoadConfig();
             }
-
-            return LoadConfig(configFilePath);
-        }
-
-        private static void CreateDefaultConfig(string filePath)
-        {
-            XElement config = new XElement("Configuration",
-                new XElement("Database",
-                    DefaultConfigItems.Select(kv => new XElement(kv.Key, kv.Value))
-                )
-            );
-
-            config.Save(filePath);
-        }
-
-        private static void ValidateAndUpdateConfig(string filePath)
-        {
-            XElement config = XElement.Load(filePath);
-            XElement databaseElement = config.Element("Database");
-
-            foreach (var kv in DefaultConfigItems)
+            else
             {
-                if (databaseElement.Element(kv.Key) == null)
+                return CreateDefaultConfig();
+            }
+        }
+
+        public static DatabaseConfig LoadConfig()
+        {
+            try
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(DatabaseConfig));
+                using (FileStream stream = new FileStream(configFilePath, FileMode.Open))
                 {
-                    databaseElement.Add(new XElement(kv.Key, kv.Value));
+                    return (DatabaseConfig)serializer.Deserialize(stream);
                 }
             }
-
-            config.Save(filePath);
-        }
-
-        private static DatabaseConfig LoadConfig(string filePath)
-        {
-            ValidateAndUpdateConfig(filePath);
-
-            XElement config = XElement.Load(filePath);
-            XElement databaseElement = config.Element("Database");
-
-            DatabaseConfig dbConfig = new DatabaseConfig();
-            foreach (var element in databaseElement.Elements())
+            catch (Exception ex)
             {
-                dbConfig.ConfigItems[element.Name.LocalName] = element.Value;
+                Logger.Log($"Error loading config: {ex.Message}", isError: true, debug: true);
+                return CreateDefaultConfig();
             }
-
-            return dbConfig;
         }
 
-        #endregion
-
-        #region Update Config
-
-        public static void UpdateConfig(DatabaseConfig config)
+        public static void SaveConfig(DatabaseConfig config)
         {
-            string configFilePath = GetConfigFilePath();
-
-            XElement xmlConfig = new XElement("Configuration",
-                new XElement("Database",
-                    config.ConfigItems.Select(kv => new XElement(kv.Key, kv.Value))
-                )
-            );
-
-            xmlConfig.Save(configFilePath);
+            try
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(DatabaseConfig));
+                using (FileStream stream = new FileStream(configFilePath, FileMode.Create))
+                {
+                    serializer.Serialize(stream, config);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error saving config: {ex.Message}", isError: true, debug: config.Debug);
+            }
         }
 
-        #endregion
+        private static DatabaseConfig CreateDefaultConfig()
+        {
+            DatabaseConfig config = new DatabaseConfig
+            {
+                ConnectionString = @"Server=.\SQLEXPRESS;Database=ChipLogic;User Id=ChipLogic;Password=ChipLogic;TrustServerCertificate=True;Encrypt=False",
+                IsDatabaseCreated = false,
+                Debug = false
+            };
+            SaveConfig(config);
+            return config;
+        }
+
+        public static bool ValidateConfig(DatabaseConfig config)
+        {
+            return !string.IsNullOrWhiteSpace(config.ConnectionString);
+        }
     }
 }
