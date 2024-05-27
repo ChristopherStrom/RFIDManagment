@@ -7,6 +7,7 @@ namespace ChipLogic.Pages
         public WelcomePage()
         {
             InitializeComponent();
+            VersionTextBlock.Text = $"Version {GlobalConstants.CurrentVersion}";
         }
     }
 }

@@ -95,7 +95,12 @@ namespace ChipLogic
             {
                 isLoggedIn = true;
                 Logger.Log("Login successful.", isError: false, debug: debug);
-                UpdateLoginState();
+
+                var permissions = DBCommands.GetUserPermissions(username, config.ConnectionString);
+                UpdateLoginState(permissions);
+
+                // Navigate to WelcomePage after login
+                MainFrame.Navigate(new WelcomePage());
             }
             else
             {
@@ -103,7 +108,6 @@ namespace ChipLogic
                 Logger.Log("Invalid username or password.", isError: true, debug: debug);
             }
         }
-
 
         private void UsernameTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
@@ -155,10 +159,17 @@ namespace ChipLogic
         {
             isLoggedIn = false;
             Logger.Log("Logout successful.", isError: false, debug: debug);
-            UpdateLoginState();
-        }
 
-        private void UpdateLoginState()
+            // Create a default UserPermissions object with all permissions set to false
+            var defaultPermissions = (IsAdmin: false, CanScanIn: false, CanScanOut: false, CanAssign: false, CanViewReports: false);
+
+            // Update the login state with default permissions
+            UpdateLoginState(defaultPermissions);
+
+            // Navigate to WelcomePage after logout
+            MainFrame.Navigate(new WelcomePage());
+        }
+        private void UpdateLoginState((bool IsAdmin, bool CanScanIn, bool CanScanOut, bool CanAssign, bool CanViewReports) permissions)
         {
             Logger.Log("Updating login state.", isError: false, debug: debug);
             if (isLoggedIn)
@@ -168,18 +179,14 @@ namespace ChipLogic
                 LoginPanel.Visibility = Visibility.Collapsed;
                 MainFrame.Visibility = Visibility.Visible;
 
-                AssignButton.Visibility = Visibility.Visible;
-                ScanInButton.Visibility = Visibility.Visible;
-                ScanOutButton.Visibility = Visibility.Visible;
-                SetupButton.Visibility = Visibility.Visible;
+                AssignButton.Visibility = permissions.CanAssign ? Visibility.Visible : Visibility.Collapsed;
+                ScanInButton.Visibility = permissions.CanScanIn ? Visibility.Visible : Visibility.Collapsed;
+                ScanOutButton.Visibility = permissions.CanScanOut ? Visibility.Visible : Visibility.Collapsed;
+                SetupButton.Visibility = permissions.IsAdmin ? Visibility.Visible : Visibility.Collapsed;
                 LogoutButton.Visibility = Visibility.Visible;
                 LoggedInUserText.Visibility = Visibility.Visible;
 
-                LoginButton.Visibility = Visibility.Collapsed;
-
                 LoggedInUserText.Text = $"Logged in as: {UsernameTextBox.Text}";
-
-                MainFrame.Navigate(new WelcomePage());
             }
             else
             {
@@ -195,17 +202,14 @@ namespace ChipLogic
                 LogoutButton.Visibility = Visibility.Collapsed;
                 LoggedInUserText.Visibility = Visibility.Collapsed;
 
-                LoginButton.Visibility = Visibility.Visible;
-
                 UsernameTextBox.Text = "Username";
                 UsernameTextBox.Foreground = Brushes.Gray;
                 PasswordBox.Password = "********";
                 PasswordBox.Tag = "Placeholder";
                 PasswordBox.Foreground = Brushes.Gray;
-
-                MainFrame.Navigate(new WelcomePage());
             }
         }
+
 
         private void RemovePlaceholderText(object sender, RoutedEventArgs e)
         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SqlClient; // Add this using directive
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -7,18 +6,64 @@ using ChipLogic.Configuration;
 using ChipLogic.Database;
 using ChipLogic.Utils;
 
-namespace ChipLogic.Pages.Settings.SettingsPages
+namespace ChipLogic.Pages.Settings
 {
     public partial class ManageUsersPage : Page
     {
-        private bool debug;
+        private DatabaseConfig config;
 
         public ManageUsersPage()
         {
             InitializeComponent();
-            DatabaseConfig config = ConfigManager.LoadOrCreateConfig();
-            debug = config.Debug;
+            config = ConfigManager.LoadOrCreateConfig();  // Initialize the config variable
             LoadExistingUsers();
+        }
+
+        private void LoadExistingUsers()
+        {
+            try
+            {
+                var users = DBCommands.GetAllUsers(config.ConnectionString);
+                ExistingUsersComboBox.ItemsSource = users;
+                DeleteUserComboBox.ItemsSource = users;
+                ChangePasswordUserComboBox.ItemsSource = users;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading users: {ex.Message}");
+            }
+        }
+
+        private void OnUserSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string selectedUsername = (string)ExistingUsersComboBox.SelectedItem;
+            if (!string.IsNullOrEmpty(selectedUsername))
+            {
+                LoadUserPermissions(selectedUsername);
+            }
+        }
+
+        private void LoadUserPermissions(string username)
+        {
+            var permissions = DBCommands.GetUserPermissions(username, config.ConnectionString);
+            IsAdminCheckBox.IsChecked = permissions.IsAdmin;
+            CanScanInCheckBox.IsChecked = permissions.CanScanIn;
+            CanScanOutCheckBox.IsChecked = permissions.CanScanOut;
+            CanAssignCheckBox.IsChecked = permissions.CanAssign;
+            CanViewReportsCheckBox.IsChecked = permissions.CanViewReports;
+        }
+
+        private void SavePermissionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            string selectedUsername = (string)ExistingUsersComboBox.SelectedItem;
+            bool isAdmin = IsAdminCheckBox.IsChecked == true;
+            bool canScanIn = CanScanInCheckBox.IsChecked == true;
+            bool canScanOut = CanScanOutCheckBox.IsChecked == true;
+            bool canAssign = CanAssignCheckBox.IsChecked == true;
+            bool canViewReports = CanViewReportsCheckBox.IsChecked == true;
+
+            DBCommands.UpdateUserPermissions(selectedUsername, isAdmin, canScanIn, canScanOut, canAssign, canViewReports, config.ConnectionString);
+            MessageBox.Show("Permissions updated successfully.");
         }
 
         private void RemovePlaceholderText(object sender, RoutedEventArgs e)
@@ -76,15 +121,14 @@ namespace ChipLogic.Pages.Settings.SettingsPages
 
             try
             {
-                DatabaseConfig config = ConfigManager.LoadOrCreateConfig();
                 DBCommands.CreateUser(username, password, config.ConnectionString);
-                Logger.Log($"User {username} created successfully.", isError: false, debug: debug);
+                Logger.Log($"User {username} created successfully.", isError: false, debug: config.Debug);
                 MessageBox.Show($"User {username} created successfully.");
                 LoadExistingUsers(); // Reload users to reflect the new user
             }
             catch (Exception ex)
             {
-                Logger.Log($"Error creating user: {ex.Message}", isError: true, debug: debug);
+                Logger.Log($"Error creating user: {ex.Message}", isError: true, debug: config.Debug);
                 MessageBox.Show($"Error creating user: {ex.Message}");
             }
         }
@@ -101,15 +145,14 @@ namespace ChipLogic.Pages.Settings.SettingsPages
 
             try
             {
-                DatabaseConfig config = ConfigManager.LoadOrCreateConfig();
                 DBCommands.DeleteUser(username, config.ConnectionString);
-                Logger.Log($"User {username} deleted successfully.", isError: false, debug: debug);
+                Logger.Log($"User {username} deleted successfully.", isError: false, debug: config.Debug);
                 MessageBox.Show($"User {username} deleted successfully.");
                 LoadExistingUsers(); // Reload users to reflect the deletion
             }
             catch (Exception ex)
             {
-                Logger.Log($"Error deleting user: {ex.Message}", isError: true, debug: debug);
+                Logger.Log($"Error deleting user: {ex.Message}", isError: true, debug: config.Debug);
                 MessageBox.Show($"Error deleting user: {ex.Message}");
             }
         }
@@ -127,54 +170,14 @@ namespace ChipLogic.Pages.Settings.SettingsPages
 
             try
             {
-                DatabaseConfig config = ConfigManager.LoadOrCreateConfig();
                 DBCommands.ChangePassword(username, newPassword, config.ConnectionString);
-                Logger.Log($"Password for user {username} changed successfully.", isError: false, debug: debug);
+                Logger.Log($"Password for user {username} changed successfully.", isError: false, debug: config.Debug);
                 MessageBox.Show($"Password for user {username} changed successfully.");
             }
             catch (Exception ex)
             {
-                Logger.Log($"Error changing password: {ex.Message}", isError: true, debug: debug);
+                Logger.Log($"Error changing password: {ex.Message}", isError: true, debug: config.Debug);
                 MessageBox.Show($"Error changing password: {ex.Message}");
-            }
-        }
-
-        private void SavePermissionsButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Implement your permissions saving logic here
-        }
-
-        private void LoadExistingUsers()
-        {
-            try
-            {
-                DatabaseConfig config = ConfigManager.LoadOrCreateConfig();
-                using (SqlConnection connection = new SqlConnection(config.ConnectionString))
-                {
-                    connection.Open();
-                    string query = "SELECT Username FROM Users";
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            DeleteUserComboBox.Items.Clear();
-                            ChangePasswordUserComboBox.Items.Clear();
-                            ModifyUserComboBox.Items.Clear();
-                            while (reader.Read())
-                            {
-                                string username = reader["Username"].ToString();
-                                DeleteUserComboBox.Items.Add(username);
-                                ChangePasswordUserComboBox.Items.Add(username);
-                                ModifyUserComboBox.Items.Add(username);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error loading existing users: {ex.Message}", isError: true, debug: debug);
-                MessageBox.Show($"Error loading existing users: {ex.Message}");
             }
         }
     }

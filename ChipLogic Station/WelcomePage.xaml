@@ -7,10 +7,17 @@
       Title="WelcomePage">
 
     <Grid Background="White">
-        <TextBlock Text="Chip Logic" 
-                   FontSize="36" 
-                   FontWeight="Bold" 
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Welcome to ChipLogic Solutions" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+            <TextBlock Text="Your RFID Management Solution" FontSize="18" Margin="0,0,0,20"/>
+        </StackPanel>
+
+        <!-- Version number at the bottom -->
+        <TextBlock x:Name="VersionTextBlock" 
                    HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"/>
+                   VerticalAlignment="Bottom" 
+                   Margin="0,0,0,10"
+                   FontSize="12" 
+                   Foreground="Gray"/>
     </Grid>
 </Page>
