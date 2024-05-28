@@ -5,7 +5,7 @@ namespace ChipLogic.Utils
 {
     public static class Logger
     {
-        private static readonly string logDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+        private static readonly string logDirectoryPath = Path.Combine("c:\\ChipLogic\\", "logs");
         private static readonly string logFilePath = Path.Combine(logDirectoryPath, $"error-{DateTime.Now:yyyy-MM-dd}.log");
 
         static Logger()

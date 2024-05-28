@@ -357,7 +357,7 @@ namespace ChipLogic.Database
 
         private static void SavePasswordToFile(string password)
         {
-            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "defaultlogin.txt");
+            string filePath = Path.Combine("c:\\ChipLogic\\", "defaultlogin.txt");
             try
             {
                 File.WriteAllText(filePath, $"Default User: ChipLogic\nPassword: {password}");

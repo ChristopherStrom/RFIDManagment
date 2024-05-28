@@ -18,7 +18,7 @@ namespace ChipLogic.Configuration
 
     public static class ConfigManager
     {
-        private static readonly string configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.xml");
+        private static readonly string configFilePath = Path.Combine("c:\\ChipLogic\\", "config.xml");
 
         public static DatabaseConfig LoadOrCreateConfig()
         {
