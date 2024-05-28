@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
 using ChipLogic.Utils;
@@ -14,23 +13,36 @@ namespace ChipLogic.Configuration
         public bool IsDatabaseCreated { get; set; } = false;
         public bool Debug { get; set; } = false;
         public int StationNumber { get; set; } = 1;
+        public string InstallPath { get; set; } = @"C:\ChipLogic\";
     }
 
     public static class ConfigManager
     {
-        private static readonly string configFilePath = Path.Combine("c:\\ChipLogic\\", "config.xml");
+        private static string configFilePath;
 
         public static DatabaseConfig LoadOrCreateConfig()
         {
+            DatabaseConfig tempConfig = CreateDefaultConfig();
+
+            string initialConfigFilePath = Path.Combine(tempConfig.InstallPath, "config.xml");
+
+            if (File.Exists(initialConfigFilePath))
+            {
+                tempConfig = LoadConfig(initialConfigFilePath);
+                configFilePath = Path.Combine(tempConfig.InstallPath, "config.xml");
+            }
+            else
+            {
+                configFilePath = initialConfigFilePath;
+            }
+
             DatabaseConfig config;
 
             if (File.Exists(configFilePath))
             {
-                config = LoadConfig();
-                bool isUpdated = ValidateAndUpdateConfig(ref config);
-
-                    SaveConfig(config);
-                
+                config = LoadConfig(configFilePath);
+                ValidateAndUpdateConfig(ref config);
+                SaveConfig(config);
             }
             else
             {
@@ -41,12 +53,12 @@ namespace ChipLogic.Configuration
             return config;
         }
 
-        public static DatabaseConfig LoadConfig()
+        public static DatabaseConfig LoadConfig(string filePath)
         {
             try
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(DatabaseConfig));
-                using (FileStream stream = new FileStream(configFilePath, FileMode.Open))
+                using (FileStream stream = new FileStream(filePath, FileMode.Open))
                 {
                     return (DatabaseConfig)serializer.Deserialize(stream);
                 }
@@ -79,12 +91,10 @@ namespace ChipLogic.Configuration
             return new DatabaseConfig();
         }
 
-        private static bool ValidateAndUpdateConfig(ref DatabaseConfig config)
+        private static void ValidateAndUpdateConfig(ref DatabaseConfig config)
         {
-            bool isUpdated = false;
             var defaultConfig = new DatabaseConfig();
 
-            // Check for null or empty properties and update them
             foreach (PropertyInfo property in typeof(DatabaseConfig).GetProperties())
             {
                 var currentValue = property.GetValue(config);
@@ -93,11 +103,8 @@ namespace ChipLogic.Configuration
                 if (currentValue == null || (currentValue is string str && string.IsNullOrWhiteSpace(str)))
                 {
                     property.SetValue(config, defaultValue);
-                    isUpdated = true;
                 }
             }
-
-            return isUpdated;
         }
 
         public static bool ValidateConfig(DatabaseConfig config)

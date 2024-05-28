@@ -26,8 +26,8 @@ namespace ChipLogic
 
             #region Database Initialization
 
-            // Load configuration
             config = ConfigManager.LoadOrCreateConfig();
+            Logger.Initialize(config.InstallPath); // Initialize logger with install path
             debug = config.Debug;
 
             if (!ConfigManager.ValidateConfig(config))
@@ -50,7 +50,6 @@ namespace ChipLogic
                 }
                 else
                 {
-                    DatabaseInitializer.CheckAndUpdateDatabase(config, GlobalConstants.CurrentVersion);
                     Logger.Log("Database connection successful.", isError: false, debug: debug);
                     SetDatabaseStatus(true);
                 }
@@ -72,7 +71,6 @@ namespace ChipLogic
             }
             #endregion
 
-            // Navigate to WelcomePage on application start
             MainFrame.Navigate(new WelcomePage());
         }
 

@@ -5,11 +5,14 @@ namespace ChipLogic.Utils
 {
     public static class Logger
     {
-        private static readonly string logDirectoryPath = Path.Combine("c:\\ChipLogic\\", "logs");
-        private static readonly string logFilePath = Path.Combine(logDirectoryPath, $"error-{DateTime.Now:yyyy-MM-dd}.log");
+        private static string logDirectoryPath;
+        private static string logFilePath;
 
-        static Logger()
+        public static void Initialize(string installPath)
         {
+            logDirectoryPath = Path.Combine(installPath, "logs");
+            logFilePath = Path.Combine(logDirectoryPath, $"error-{DateTime.Now:yyyy-MM-dd}.log");
+
             try
             {
                 Directory.CreateDirectory(logDirectoryPath);
