@@ -1,11 +1,59 @@
-﻿<Page x:Class="ChipLogic.Pages.Settings.SettingsPages.ManageCustomersPage"
+﻿<Page x:Class="ChipLogic.Pages.Settings.ManageCustomersPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d"
-      Title="ManageCustomersPage">
-    <Grid Background="White">
-        <TextBlock Text="Manage Customers" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24"/>
-    </Grid>
+      Title="Manage Customers">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Background="White">
+            <StackPanel Margin="20">
+                <TextBlock Text="Manage Customers" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+                <!-- Add Customer Section -->
+                <GroupBox Header="Add New Customer" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <TextBox x:Name="CustomerNumberTextBox" Text="Customer Number" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                        <TextBox x:Name="CompanyNameTextBox" Text="Company Name" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                        <TextBox x:Name="ContactNameTextBox" Text="Contact Name" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                        <TextBox x:Name="ContactPhoneTextBox" Text="Contact Phone" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                        <TextBox x:Name="ContactEmailTextBox" Text="Contact Email" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                        <TextBox x:Name="CustomerAddressTextBox" Text="Customer Address" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="IsActiveCheckBox" Content="Active" IsChecked="True" Margin="0,0,0,10"/>
+                        <Button Content="Add Customer" Style="{StaticResource ModernButtonStyle}" Click="AddCustomerButton_Click"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Edit Customer Section with Searchable Dropdown -->
+                <GroupBox Header="Edit Customer" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <!-- Searchable Dropdown ComboBox -->
+                        <ComboBox x:Name="CustomerComboBox" 
+                                  IsEditable="True" 
+                                  StaysOpenOnEdit="True" 
+                                  IsTextSearchEnabled="False" 
+                                  PreviewKeyUp="CustomerComboBox_PreviewKeyUp" 
+                            SelectionChanged="CustomerComboBox_SelectionChanged"
+                                  Margin="0,0,0,10"/>
+                            <TextBox x:Name="EditCustomerNumberTextBox" Text="Customer Number" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10" IsEnabled="False"/>
+                            <TextBox x:Name="EditCompanyNameTextBox" Text="Company Name" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                            <TextBox x:Name="EditContactNameTextBox" Text="Contact Name" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                            <TextBox x:Name="EditContactPhoneTextBox" Text="Contact Phone" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                            <TextBox x:Name="EditContactEmailTextBox" Text="Contact Email" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                            <TextBox x:Name="EditCustomerAddressTextBox" Text="Customer Address" Foreground="Gray" GotFocus="RemovePlaceholderText" LostFocus="AddPlaceholderText" Margin="0,0,0,10"/>
+                            <CheckBox x:Name="EditIsActiveCheckBox" Content="Active" Margin="0,0,0,10"/>
+                            <Button Content="Save Changes" Style="{StaticResource ModernButtonStyle}" Click="SaveCustomerButton_Click"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Delete Customer Section -->
+                <GroupBox Header="Delete Customer" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <ComboBox x:Name="DeleteCustomerComboBox" Margin="0,0,0,10"/>
+                        <Button Content="Delete Customer" Style="{StaticResource ModernButtonStyle}" Click="DeleteCustomerButton_Click"/>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Page>

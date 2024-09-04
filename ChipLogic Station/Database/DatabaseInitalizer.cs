@@ -137,7 +137,20 @@ namespace ChipLogic.Database
                         VersionNumber NVARCHAR(50) NOT NULL,
                         AppliedOn DATETIME NOT NULL DEFAULT GETDATE()
                     );
-                END";
+                END
+                 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Customers')
+                        BEGIN
+                            CREATE TABLE Customers (
+                                CustomerID UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+                                CustomerNumber NVARCHAR(20) NOT NULL UNIQUE,
+                                CompanyName NVARCHAR(100) NOT NULL,
+                                ContactName NVARCHAR(100),
+                                ContactPhone NVARCHAR(20),
+                                ContactEmail NVARCHAR(100),
+                                CustomerAddress NVARCHAR(200),
+                                IsActive BIT NOT NULL DEFAULT 1
+                            );
+                        END";
 
             using (SqlCommand command = new SqlCommand(createTablesQuery, connection))
             {

@@ -210,5 +210,149 @@ namespace ChipLogic.Database
 
             return users;
         }
+
+
+        public static void AddCustomer(string customerNumber, string companyName, string contactName, string contactPhone, string contactEmail, string customerAddress, bool isActive, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = @"INSERT INTO Customers (CustomerNumber, CompanyName, ContactName, ContactPhone, ContactEmail, CustomerAddress, IsActive)
+                         VALUES (@CustomerNumber, @CompanyName, @ContactName, @ContactPhone, @ContactEmail, @CustomerAddress, @IsActive)";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CustomerNumber", customerNumber);
+                    command.Parameters.AddWithValue("@CompanyName", companyName);
+                    command.Parameters.AddWithValue("@ContactName", contactName);
+                    command.Parameters.AddWithValue("@ContactPhone", contactPhone);
+                    command.Parameters.AddWithValue("@ContactEmail", contactEmail);
+                    command.Parameters.AddWithValue("@CustomerAddress", customerAddress);
+                    command.Parameters.AddWithValue("@IsActive", isActive);
+
+                    try
+                    {
+                        connection.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException sqlEx)
+                    {
+                        Logger.Log($"SQL error during customer insertion: {sqlEx.Message}", isError: true, debug: true);
+                        throw;
+                    }
+                }
+            }
+        }
+
+
+        public static void DeleteCustomer(string customerNumber, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "DELETE FROM Customers WHERE CustomerNumber = @CustomerNumber";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CustomerNumber", customerNumber);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void UpdateCustomer(string customerNumber, string companyName, string contactName, string contactPhone, string contactEmail, string customerAddress, bool isActive, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "UPDATE Customers SET CompanyName = @CompanyName, ContactName = @ContactName, ContactPhone = @ContactPhone, " +
+                               "ContactEmail = @ContactEmail, CustomerAddress = @CustomerAddress, IsActive = @IsActive WHERE CustomerNumber = @CustomerNumber";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CustomerNumber", customerNumber);
+                    command.Parameters.AddWithValue("@CompanyName", companyName);
+                    command.Parameters.AddWithValue("@ContactName", contactName);
+                    command.Parameters.AddWithValue("@ContactPhone", contactPhone);
+                    command.Parameters.AddWithValue("@ContactEmail", contactEmail);
+                    command.Parameters.AddWithValue("@CustomerAddress", customerAddress);
+                    command.Parameters.AddWithValue("@IsActive", isActive);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static List<string> GetAllCustomers(string connectionString)
+        {
+            List<string> customers = new List<string>();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT CustomerNumber FROM Customers";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            customers.Add(reader["CustomerNumber"].ToString());
+                        }
+                    }
+                }
+            }
+            return customers;
+        }
+
+        public static (string CustomerNumber, string CompanyName, string ContactName, string ContactPhone, string ContactEmail, string CustomerAddress, bool IsActive) GetCustomerDetails(string customerNumber, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT CustomerNumber, CompanyName, ContactName, ContactPhone, ContactEmail, CustomerAddress, IsActive FROM Customers WHERE CustomerNumber = @CustomerNumber";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CustomerNumber", customerNumber);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            string companyName = reader["CompanyName"].ToString();
+                            string contactName = reader["ContactName"].ToString();
+                            string contactPhone = reader["ContactPhone"].ToString();
+                            string contactEmail = reader["ContactEmail"].ToString();
+                            string customerAddress = reader["CustomerAddress"].ToString();
+                            bool isActive = Convert.ToBoolean(reader["IsActive"]);
+                            return (customerNumber, companyName, contactName, contactPhone, contactEmail, customerAddress, isActive);
+                        }
+                    }
+                }
+            }
+            return (null, null, null, null, null, null, false);
+        }
+
+        public static bool CheckCustomerNumberExists(string customerNumber, string connectionString)
+        {
+            bool exists = false;
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "SELECT COUNT(*) FROM Customers WHERE CustomerNumber = @CustomerNumber";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CustomerNumber", customerNumber);
+
+                    try
+                    {
+                        connection.Open();
+                        exists = (int)command.ExecuteScalar() > 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"Error checking customer number: {ex.Message}", isError: true, debug: true);
+                    }
+                }
+            }
+
+            return exists;
+        }
+
     }
 }
